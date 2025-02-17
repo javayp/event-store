@@ -2,6 +2,9 @@ spring:
   config:
     activate:
       on-profile: local
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/eventstore
   kafka:
     consumer:
       bootstrap-servers: localhost:9092,localhost:9093,localhost:9094

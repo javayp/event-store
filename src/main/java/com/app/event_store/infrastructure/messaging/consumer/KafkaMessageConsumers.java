@@ -1,7 +1,10 @@
 package com.app.event_store.infrastructure.messaging.consumer;
 
 
+import com.app.event_store.infrastructure.persistence.mongo.service.MongoEventStoreService;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +14,12 @@ import java.util.List;
 @Slf4j
 public class KafkaMessageConsumers {
 
+    private MongoEventStoreService mongoEventStoreService;
+
+    @Autowired
+    public KafkaMessageConsumers(MongoEventStoreService mongoEventStoreService) {
+        this.mongoEventStoreService = mongoEventStoreService;
+    }
 
     /**
      * Batch Consumer
@@ -36,8 +45,11 @@ public class KafkaMessageConsumers {
             containerFactory = "singleKafkaListenerContainerFactory"
     )
     public void consumeSingleMessage(String message) {
-        log.info("Single message received: {}", message);
-
-        // Process the single message
+        try {
+            log.info("Single message received");
+            mongoEventStoreService.storeEvents(Document.parse(message));
+        }catch (Exception e){
+            log.error("Error while saving the data to mongo from kafka events.Message received is {} and the error",message,e);
+        }
     }
 }
